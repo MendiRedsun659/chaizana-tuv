@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Award, Heart, Shield, Sparkles } from 'lucide-react';
+import { Award, Heart, Shield, Sparkles, Phone } from 'lucide-react';
 import CountdownTimer from './components/CountdownTimer';
 import DressCode from './components/DressCode';
 import LocationDetails from './components/LocationDetails';
@@ -171,7 +171,8 @@ export default function App() {
                     Амыдыралдын чаа чадазы ажыттынды
                   </p>
                   <p className="pt-2">
-                    Улуг оорушкуну мен-биле улежип, бистин байырлалывыстын хундулуг аалчызы болурунарны улуг хундуткел-биле чаладым.
+                    Улуг оорушкуну мен-биле улежип, бистин байырлалывыстын<br /> 
+                    хундулуг аалчызы болурунарны улуг хундуткел-биле чаладым.
                   </p>
                 </div>
               </div>
@@ -225,6 +226,35 @@ export default function App() {
             {/* BOW SEGMENT OVERLAYS */}
             <div className="flex justify-center py-2">
               <ElegantBow />
+            </div>
+
+            {/* CONTACT PHONE SECTION */}
+            <section className="w-full max-w-xl mx-auto px-4 mt-2">
+              <div className="bg-white/80 backdrop-blur-md rounded-2xl p-6 border border-brand-100 shadow-sm text-center">
+                <div className="inline-flex items-center justify-center p-3 bg-brand-50 rounded-full text-brand-500 mb-3 border border-brand-100">
+                  <Phone className="w-5 h-5 animate-pulse" />
+                </div>
+                <h4 className="font-serif text-lg font-bold text-gray-800">
+                  Харылзажыр телефон дугаары
+                </h4>
+              
+                
+                <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-2.5">
+                  <a
+                    href="tel:89338881717"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 py-2.5 px-5 bg-brand-50 hover:bg-brand-100 text-brand-700 font-sans text-xs font-bold rounded-xl border border-brand-150 transition-all duration-300 hover:scale-[1.01]"
+                  >
+                    <Phone className="w-3.5 h-3.5" />
+                    89338881717 
+                  </a>
+                  
+                </div>
+              </div>
+            </section>
+
+            {/* BOW SEGMENT OVERLAYS */}
+            <div className="flex justify-center py-2">
+              <div className="w-16 h-px bg-[#ffccd5]" />
             </div>
 
             {/* HOST CONTROLLERS VIEW */}
