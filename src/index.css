@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Montserrat:wght@200..800&family=Marck+Script&family=Great+Vibes&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Cormorant Garamond", "Playfair Display", Georgia, serif;
+  --font-sans: "Montserrat", sans-serif;
+  --font-cursive: "Marck Script", "Great Vibes", cursive;
+
+  /* Premium soft pink and rose palette */
+  --color-rose-gold: #e0a96d;
+  --color-brand-10: #fffbf9;
+  --color-brand-50: #fff0f2;
+  --color-brand-100: #ffe1e5;
+  --color-brand-200: #ffc9cf;
+  --color-brand-300: #ffa1ad;
+  --color-brand-400: #ff6e85;
+  --color-brand-500: #be7282;
+  --color-brand-600: #db2754;
+  --color-brand-700: #be123c;
+  --color-brand-800: #8a4b57;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-brand-10);
+    color: #1a1a1a;
+  }
+}
+
+/* Beautiful custom soft animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(1deg); }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.02); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 4s ease-in-out infinite;
+}
+
