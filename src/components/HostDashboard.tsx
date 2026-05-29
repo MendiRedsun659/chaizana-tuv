@@ -122,7 +122,7 @@ export default function HostDashboard({ lastUpdated }: HostDashboardProps) {
             />
             {unlockedError && <p className="font-sans text-xs text-rose-600 font-medium">{unlockedError}</p>}
             
-            <p className="font-sans text-[10px] text-brand-400 font-semibold italic">Код: chaizana2026</p>
+            
 
             <button
               type="submit"
