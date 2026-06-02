@@ -350,14 +350,7 @@ export default function HostDashboard({ lastUpdated }: HostDashboardProps) {
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 text-left flex gap-3 text-blue-800">
           <Info className="w-5 h-5 shrink-0 text-blue-500 mt-0.5" />
           <div className="font-sans text-xs">
-            <h5 className="font-bold">Эскериг (GitHub Pages кавызындан):</h5>
-            <p className="mt-1 leading-relaxed text-blue-700 font-semibold">
-              Силер сайтыңарны GitHub-ка салган болгаш, аалчыларның харыылары дорт силерниң почтаңарже (<strong>chmen00@mail.ru</strong>) дамчып келир! 
-              <br />
-              <span className="text-gray-500">•</span> Баштайгы аалчы харыыны чоруткан соонда почтаңар узуп хынап, <strong>FormSubmit</strong> каттыжыышкынын экижидер кылдыр силерже келген холбааны бадыткап (Activate) каар силер.
-              <br />
-              <span className="text-gray-500">•</span> Бо черге почтадан келген аалчыларның харыыларын курап, адаанда <strong>«+ Аалчы мануалдыг немээр»</strong> ужуру таварыштыр киирзин дээш кылдывыс. База база өске телефон кавызындан киргенде камгалаар дээш листи файл кылдыр камгалап (Backup) база ажыдып болур.
-            </p>
+            
           </div>
         </div>
 
