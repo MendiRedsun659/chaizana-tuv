@@ -15,7 +15,20 @@ export default function HostDashboard({ lastUpdated }: HostDashboardProps) {
 
   const HOST_PASSWORD = 'chaizana2026';
 
-  const loadReplies = () => {
+  const loadReplies = async () => {
+    try {
+      // 1. Try reading from the server API first
+      const response = await fetch('/api/rsvps');
+      if (response.ok) {
+        const data = await response.json();
+        setReplies(data);
+        return;
+      }
+    } catch (err) {
+      console.warn('Backend server not available for load replies, falling back to local storage:', err);
+    }
+
+    // 2. Fallback to localStorage
     try {
       const saved = localStorage.getItem('chaizana_rsvp_replies');
       if (saved) {
@@ -43,16 +56,44 @@ export default function HostDashboard({ lastUpdated }: HostDashboardProps) {
     }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Бо харыыны листен шынап-ла узуткаар силер бе?')) {
+      try {
+        // Try deleting from backend first
+        const response = await fetch(`/api/rsvp/${id}`, {
+          method: 'DELETE',
+        });
+        if (response.ok) {
+          loadReplies();
+          return;
+        }
+      } catch (err) {
+        console.warn('Backend server not available for deleting, falling back to local storage:', err);
+      }
+
+      // Fallback
       const updated = replies.filter((r) => r.id !== id);
       localStorage.setItem('chaizana_rsvp_replies', JSON.stringify(updated));
       setReplies(updated);
     }
   };
 
-  const handleClearAll = () => {
+  const handleClearAll = async () => {
     if (window.confirm('КИЧЭЭНГЕЙ: бо бүгү аалчылар харыыларын узуткаар. Узуткаар ма?')) {
+      try {
+        // Try clearing backend first
+        const response = await fetch('/api/rsvps/clear', {
+          method: 'POST',
+        });
+        if (response.ok) {
+          loadReplies();
+          return;
+        }
+      } catch (err) {
+        console.warn('Backend server not available for clearing, falling back to local storage:', err);
+      }
+
+      // Fallback
       localStorage.removeItem('chaizana_rsvp_replies');
       setReplies([]);
     }
@@ -69,7 +110,7 @@ export default function HostDashboard({ lastUpdated }: HostDashboardProps) {
   const handleCopySummary = () => {
     if (replies.length === 0) return;
 
-    let text = `🎓 ЧАЙЗАНАНЫҢ ДИПЛОМ БАЙЫРЛАЛЫНГА ААЛЧЫЛАР ЛИЗИ (05.06.2026):\n\n`;
+    let text = `🎓 ЧАЙЗАНАНЫҢ ДИПЛОМ БАЫЙРЛАЛЫНГА ААЛЧЫЛАР ЛИЗИ (05.06.2026):\n\n`;
     text += `✅ ТОЧНО КЕЛИРЛЕР (${totalAttendingGuests} кижи):\n`;
 
     let counter = 1;
@@ -107,7 +148,7 @@ export default function HostDashboard({ lastUpdated }: HostDashboardProps) {
           <div className="w-12 h-12 bg-brand-50 rounded-full flex items-center justify-center text-brand-600 mx-auto mb-4 border border-brand-100">
             <KeyRound className="w-5 h-5 text-brand-500" />
           </div>
-          <h4 className="font-serif text-lg font-semibold text-gray-800">Эрттирикчиниң панели</h4>
+          <h4 className="font-serif text-lg font-semibold text-gray-800 font-bold">Эрттирикчиниң панели</h4>
           <p className="font-sans text-[11px] text-gray-400 mt-1 mb-4">
             Дорт Чайзанага кирер чер. Силер келир аалчыларның лизин көөр дээш пароль киириңер.
           </p>
@@ -118,15 +159,13 @@ export default function HostDashboard({ lastUpdated }: HostDashboardProps) {
               placeholder="Эрттирикчиниң паролу"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border border-brand-150 focus:outline-none focus:ring-2 focus:ring-brand-300 font-sans text-sm text-center text-gray-800"
+              className="w-full px-4 py-2.5 rounded-xl border border-brand-105 focus:outline-none focus:ring-2 focus:ring-brand-300 font-sans text-sm text-center text-gray-800 font-semibold"
             />
-            {unlockedError && <p className="font-sans text-xs text-rose-600 font-medium">{unlockedError}</p>}
-            
-            
+            {unlockedError && <p className="font-sans text-xs text-rose-600 font-medium font-bold">{unlockedError}</p>}
 
             <button
               type="submit"
-              className="w-full py-2.5 px-4 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-sans text-xs font-semibold shadow-md transition-all cursor-pointer"
+              className="w-full py-2.5 px-4 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-sans text-xs font-semibold shadow-md transition-all cursor-pointer font-bold"
             >
               Панельче кирер
             </button>
@@ -138,11 +177,11 @@ export default function HostDashboard({ lastUpdated }: HostDashboardProps) {
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-6">
-      <div className="bg-white/95 backdrop-blur-md rounded-2xl p-6 md:p-8 border border-brand-200 shadow-lg animate-fade-in text-left">
+      <div className="bg-white/95 backdrop-blur-md rounded-2xl p-6 md:p-8 border border-brand-200 shadow-lg text-left">
         {/* Dashboard Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-100 pb-5 mb-6">
           <div>
-            <span className="font-sans text-[10px] bg-brand-100 text-brand-700 px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">
+            <span className="font-sans text-[10px] bg-brand-100 text-brand-700 px-2.5 py-0.5 rounded-full uppercase tracking-wider font-semibold">
               Host Panel
             </span>
             <h3 className="font-serif text-2xl text-gray-800 font-bold mt-1">
@@ -161,7 +200,7 @@ export default function HostDashboard({ lastUpdated }: HostDashboardProps) {
               className={`py-2 px-3.5 rounded-xl text-xs font-semibold font-sans flex items-center gap-1.5 shadow-sm transition-all duration-300 cursor-pointer ${
                 copied
                   ? 'bg-emerald-500 text-white'
-                  : 'bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-100 hover:scale-102 disabled:opacity-40'
+                  : 'bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-100 disabled:opacity-40 font-bold'
               }`}
             >
               {copied ? (
@@ -177,7 +216,7 @@ export default function HostDashboard({ lastUpdated }: HostDashboardProps) {
 
             <button
               onClick={() => setIsUnlocked(false)}
-              className="py-2 px-3.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-650 rounded-xl text-xs font-semibold font-sans hover:scale-102 transition-all cursor-pointer"
+              className="py-2 px-3.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-600 rounded-xl text-xs font-semibold font-sans hover:scale-102 transition-all cursor-pointer font-bold"
             >
               Үнер
             </button>
@@ -187,7 +226,7 @@ export default function HostDashboard({ lastUpdated }: HostDashboardProps) {
         {/* Dashboard Stats Grids */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
           <div className="bg-brand-50/50 p-4 rounded-xl border border-brand-100 flex items-center gap-3">
-            <div className="p-3 bg-brand-500 rounded-xl text-white">
+            <div className="p-3 bg-brand-500 rounded-xl text-white animate-[pulse_3s_infinite]">
               <Users className="w-5 h-5" />
             </div>
             <div>
@@ -213,7 +252,7 @@ export default function HostDashboard({ lastUpdated }: HostDashboardProps) {
 
         {/* Detailed Guest Tables */}
         <div>
-          <h4 className="font-serif text-sm font-semibold text-gray-800 mb-4">
+          <h4 className="font-serif text-sm font-semibold text-gray-800 mb-4 font-bold">
             📋 Аалчыларның долу лизи
           </h4>
 
@@ -280,7 +319,7 @@ export default function HostDashboard({ lastUpdated }: HostDashboardProps) {
             <div className="mt-5 flex justify-end">
               <button
                 onClick={handleClearAll}
-                className="py-1.5 px-3 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-xs font-semibold font-sans transition-colors cursor-pointer"
+                className="py-1.5 px-3 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-xs font-semibold font-sans transition-colors cursor-pointer font-bold"
               >
                 Листи долу узуткаар
               </button>
