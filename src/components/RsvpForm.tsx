@@ -36,8 +36,37 @@ export default function RsvpForm({ onRsvpAdded }: RsvpFormProps) {
       submittedAt: new Date().toISOString(),
     };
 
+    // 1. Send Email Notification using FormSubmit (Free secure form email sender)
+    // This allows email delivery to work perfectly on static hosts like GitHub Pages!
+    const TARGET_EMAIL = 'chmen00@mail.ru'; 
+    const emailPayload = {
+      _subject: `🎓 Ответ на приглашение: ${newReply.name}`,
+      _captcha: 'false',
+      _template: 'table',
+      'Имя и Фамилия': newReply.name,
+      'Придет ли на праздник': newReply.isAttending === 'yes' ? 'Да, придет ✓' : newReply.isAttending === 'no' ? 'Нет, не придет ✕' : 'Думает ⌛',
+      'Количество гостей': newReply.isAttending === 'yes' ? newReply.guestsCount : '0',
+      'Пожелание или комментарий': newReply.comment || 'Без комментария',
+      'Дата отправки': new Date(newReply.submittedAt).toLocaleString('ru-RU')
+    };
+
     try {
-      // 1. Try sending to the backend server API
+      fetch(`https://formsubmit.co/ajax/${TARGET_EMAIL}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(emailPayload)
+      }).catch(err => {
+        console.error('Error sending email notification:', err);
+      });
+    } catch (e) {
+      console.error(e);
+    }
+
+    // 2. Try sending to the backend server API for persistent dashboard sync (if server is active)
+    try {
       const response = await fetch('/api/rsvp', {
         method: 'POST',
         headers: {
@@ -59,7 +88,7 @@ export default function RsvpForm({ onRsvpAdded }: RsvpFormProps) {
       console.warn('Backend server not available, falling back to local storage:', err);
     }
 
-    // 2. Fallback to localStorage if the backend is not deployed/offline
+    // 3. Fallback to localStorage (ensures the client remains updated even offline or on static host)
     try {
       const saved = localStorage.getItem('chaizana_rsvp_replies');
       const replies: RSVPReply[] = saved ? JSON.parse(saved) : [];
