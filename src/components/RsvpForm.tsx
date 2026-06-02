@@ -12,9 +12,10 @@ export default function RsvpForm({ onRsvpAdded }: RsvpFormProps) {
   const [guestsCount, setGuestsCount] = useState(1);
   const [comment, setComment] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
 
@@ -22,6 +23,8 @@ export default function RsvpForm({ onRsvpAdded }: RsvpFormProps) {
       setErrorMsg('Адыңар база фамилияңарны киириптериңерни диледим.');
       return;
     }
+
+    setIsSubmitting(true);
 
     const newReply: RSVPReply = {
       id: Math.random().toString(36).substring(2, 9),
@@ -34,24 +37,47 @@ export default function RsvpForm({ onRsvpAdded }: RsvpFormProps) {
     };
 
     try {
-      // Get existing replies from localStorage
+      // 1. Try sending to the backend server API
+      const response = await fetch('/api/rsvp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newReply),
+      });
+
+      if (response.ok) {
+        // Success backend save
+        setIsSubmitted(true);
+        if (onRsvpAdded) {
+          onRsvpAdded();
+        }
+        setIsSubmitting(false);
+        return;
+      }
+    } catch (err) {
+      console.warn('Backend server not available, falling back to local storage:', err);
+    }
+
+    // 2. Fallback to localStorage if the backend is not deployed/offline
+    try {
       const saved = localStorage.getItem('chaizana_rsvp_replies');
       const replies: RSVPReply[] = saved ? JSON.parse(saved) : [];
 
-      // Add new or replace if matching name (to allow updates easily)
       const filtered = replies.filter((r) => r.name.toLowerCase() !== newReply.name.toLowerCase());
       const updated = [...filtered, newReply];
 
       localStorage.setItem('chaizana_rsvp_replies', JSON.stringify(updated));
       setIsSubmitted(true);
 
-      // Trigger dashboard update if callback provided
       if (onRsvpAdded) {
         onRsvpAdded();
       }
     } catch (err) {
       console.error(err);
       setErrorMsg('Харыы чорударынга чазыг болду. Дараа катап шинеп көүңер.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -66,11 +92,11 @@ export default function RsvpForm({ onRsvpAdded }: RsvpFormProps) {
   if (isSubmitted) {
     return (
       <div className="w-full max-w-xl mx-auto px-4">
-        <div className="bg-white/95 backdrop-blur-md rounded-2xl p-8 border border-brand-200 shadow-md text-center animate-fade-in">
+        <div className="bg-white/95 backdrop-blur-md rounded-2xl p-8 border border-brand-200 shadow-md text-center">
           <div className="inline-flex items-center justify-center p-3.5 bg-brand-50 rounded-full text-brand-500 mb-4 animate-bounce">
             <CheckCircle2 className="w-8 h-8 text-brand-500" />
           </div>
-          <h4 className="font-serif text-2xl text-brand-700 font-semibold mb-2">
+          <h4 className="font-serif text-2xl text-brand-700 font-semibold mb-2 font-bold">
             Харыы чаагай чоруттунду!
           </h4>
           <p className="font-sans text-xs text-gray-600 mt-2 leading-relaxed max-w-sm mx-auto">
@@ -94,9 +120,9 @@ export default function RsvpForm({ onRsvpAdded }: RsvpFormProps) {
     <div className="w-full max-w-xl mx-auto px-4">
       <div className="text-center mb-6">
         <div className="inline-flex items-center justify-center p-3.5 bg-brand-50 rounded-full text-brand-500 mb-3 border border-brand-100">
-          <Sparkles className="w-6 h-6 animate-pulse" />
+          <Sparkles className="w-6 h-6 animate-[pulse_2s_infinite]" />
         </div>
-        <h3 className="font-serif text-2xl sm:text-3xl text-[#8a4b57] font-semibold tracking-tight">
+        <h3 className="font-serif text-2xl sm:text-3xl text-[#8a4b57] font-semibold tracking-tight font-bold">
           Келириңерни бадыткаары
         </h3>
         <p className="font-sans text-xs text-gray-500 max-w-md mx-auto mt-2">
@@ -105,10 +131,10 @@ export default function RsvpForm({ onRsvpAdded }: RsvpFormProps) {
       </div>
 
       {/* Styled Elegant Gift Notice block directly before the form */}
-      <div className="bg-amber-50/90 border border-amber-200 rounded-2xl p-4.5 mb-6 text-left max-w-xl mx-auto flex gap-3 shadow-inner">
-        <span className="text-xl shrink-0 mt-0.5 select-none">🎁</span>
+      <div className="bg-amber-50/90 border border-amber-200 rounded-2xl p-4.5 mb-6 text-left max-w-xl mx-auto flex gap-3 shadow-inner select-none">
+        <span className="text-xl shrink-0 mt-0.5">🎁</span>
         <div>
-          <h4 className="font-serif text-sm font-bold text-amber-800">
+          <h4 className="font-serif text-sm font-bold text-amber-800 font-bold">
             Кичээнгей, оюн!
           </h4>
           <p className="font-sans text-xs text-amber-700 leading-relaxed mt-1 font-semibold">
@@ -165,7 +191,7 @@ export default function RsvpForm({ onRsvpAdded }: RsvpFormProps) {
         </div>
 
         {attendance === 'yes' && (
-          <div className="space-y-5 animate-fade-in block">
+          <div className="space-y-5 block">
             {/* Guest Count */}
             <div className="space-y-1.5 text-left">
               <label className="font-sans text-xs font-bold text-gray-600 uppercase tracking-widest block mb-1">
@@ -209,17 +235,18 @@ export default function RsvpForm({ onRsvpAdded }: RsvpFormProps) {
         </div>
 
         {errorMsg && (
-          <p className="font-sans text-xs text-rose-600 font-medium text-center animate-fade-in">
+          <p className="font-sans text-xs text-rose-600 font-medium text-center">
             {errorMsg}
           </p>
         )}
 
         <button
           type="submit"
-          className="w-full py-4 px-6 bg-brand-500 hover:bg-brand-600 text-white font-sans text-sm font-semibold rounded-xl shadow-md transition-all duration-300 hover:shadow-lg hover:shadow-brand-140/30 active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
+          disabled={isSubmitting}
+          className="w-full py-4 px-6 bg-brand-500 hover:bg-brand-600 text-white font-sans text-sm font-semibold rounded-xl shadow-md transition-all duration-300 hover:shadow-lg disabled:opacity-50 hover:shadow-brand-140/30 active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
         >
           <Send className="w-4 h-4" />
-          Харыыны чорудар
+          {isSubmitting ? 'Чорудуп турар...' : 'Харыыны чорудар'}
         </button>
       </form>
     </div>
